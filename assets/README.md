@@ -1,7 +1,8 @@
-# 角色圖片
+# 角色素材
 
-`chihuahua.png` 為使用者提供的原始吉娃娃圖片，1254 × 1254、RGBA PNG，含透明像素。保留原始位元組，未裁切、重新繪製或重編碼。
+- `chihuahua.png`：使用者提供的原始透明靜態圖，1254×1254，保留備援。
+- `chihuahua-sprites.png`：使用者提供的 4×4 透明素材表，1254×1254，原封保留。
+- `frames/00.png`～`15.png`：320×320 對齊影格，順序為左至右、上至下。前 4 格眨眼，第 2 排想吃與口水，第 3 排張嘴／咬下／左右咀嚼，第 4 排吐舌／舔右／舔左／滿足。
+- `frames/alignment.json`：實際來源邊界及輸出對齊紀錄。腳底基準 y=304，角色等比例縮放，最近鄰取樣。
 
-首頁與吃完演出均使用相對路徑 `assets/chihuahua.png`，透過 object-fit: contain、height: auto 與 image-rendering: pixelated 完整顯示。
-
-本圖為單張靜態圖片，CSS 只移動或旋轉整張圖片，不會改變表情。素材由使用者提供，未自行宣告開源圖片授權。
+重跑：在專案根目錄執行 `python3 scripts/prepare_sprites.py`。原圖不變。圖片透過相對路徑使用，不需要外部服務；沒有宣告素材開源授權。

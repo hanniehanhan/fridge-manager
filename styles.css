@@ -19,3 +19,15 @@
 .reduce-motion .hero-dog{transform:none!important}
 @media(prefers-reduced-motion:reduce){.hero-dog{transform:none!important}}
 @media(max-width:800px){.hero-dog{max-width:165px}.eating-dog{width:120px;top:18px}.hero-scene{max-width:300px}}
+
+/* Expression frames are individually normalized PNGs, never CSS sheet offsets. */
+.hero-dog,.added .hero-dog,.empty .hero-dog,.alert .hero-dog{transform:none}
+.eating-card{animation:none;min-height:255px}
+.eating-scene{height:180px;overflow:visible}
+.eating-dog{animation:none;width:155px;top:0;right:1%;transform:none}
+.cartoon-plate{animation:none;left:12%;top:97px;width:90px;height:44px}
+.food-portion{position:absolute;width:22px;height:15px;border-radius:45%;background:#e7a14a;box-shadow:inset 0 -4px #bb7839;top:6px}
+.portion-one{left:13px}.portion-two{right:13px;background:#eebd60}
+[data-portions="1"] .portion-two,[data-portions="0"] .food-portion{visibility:hidden}
+.yum{animation:none;top:30px;left:9%;font-size:14px}
+@media(max-width:800px){.eating-dog{width:145px}.eating-scene{max-width:340px}}
