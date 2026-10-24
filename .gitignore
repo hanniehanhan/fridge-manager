@@ -1,0 +1,14 @@
+.DS_Store
+node_modules/
+*.log
+.local-backups/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+coverage/
+playwright-report/
+test-results/
+.vscode/
+.idea/

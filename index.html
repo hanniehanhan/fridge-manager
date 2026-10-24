@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>치와와의 냉장고 · 식재료 관리</title><link rel="stylesheet" href="styles.css"><script defer src="date-utils.js"></script><script defer src="storage.js"></script><script defer src="app.js"></script></head>
+<body>
+
+<header><div class="brand">치와와의 냉장고</div><label class="motion-option"><input id="reduce-motion" type="checkbox"> 애니메이션 줄이기</label></header>
+<main>
+<section class="intro"><div><p class="eyebrow">작은 냉장고, 다정한 기록</p><h1>치와와의 냉장고</h1><p>잊기 전에 살펴보고, 남김없이 기록해요.</p><p id="dog-dialogue" class="speech">오늘은 뭐 먹지?</p><p id="expiry-summary" class="expiry-summary" role="status"></p><p id="expired-summary" class="expired-summary"></p></div>
+<div id="hero-scene" class="hero-scene" aria-hidden="true"><img id="hero-dog" class="hero-dog dog-image" src="assets/chihuahua.png" alt="" width="1280" height="1280"><svg class="scene-svg" viewBox="0 0 420 260"><ellipse fill="#e9e5d5" cx="224" cy="239" rx="165" ry="12"/><g class="fridge-art" stroke="#997a32" stroke-width="3"><rect x="228" y="18" width="140" height="220" rx="19" fill="#ffe38a"/><path d="M229 104h138M248 59v25m0 37v40"/><rect x="282" y="43" width="51" height="35" rx="5" fill="#fff9e9" transform="rotate(7 306 60)"/><path d="m296 58 7 7 14-15" fill="none"/></g><g class="bowl-art"><path d="M40 221h84l-12 24H52z" fill="#ffdb55" stroke="#997a32" stroke-width="3"/><ellipse cx="82" cy="221" rx="42" ry="7" fill="#fdf7e9" stroke="#997a32" stroke-width="3"/></g><g class="bag-art" stroke="#9b7a59" stroke-width="3"><path fill="#e6c99f" d="M168 165h66l-5 72h-56z"/><path fill="none" d="M184 173v-18q17-25 33 0v18"/></g><g class="hearts" fill="#c88472"><path d="M170 115c-16-18-29 8 0 22 29-14 16-40 0-22"/><path d="M218 89c-12-13-21 6 0 16 21-10 12-29 0-16"/></g></svg></div></section>
+<p id="image-error" class="notice image-warning" role="status" hidden>캐릭터 이미지를 불러오지 못했어요. 식재료 관리는 계속 사용할 수 있어요.</p>
+<div id="storage-error" class="notice error" role="alert" hidden></div><p id="message" class="notice" role="status" hidden></p>
+<div id="undo-notice" class="undo-notice" hidden><span>사용 완료 기록에 저장했어요.</span><button id="undo-button" type="button">되돌리기</button></div>
+<p id="settings-error" class="notice error" role="alert" hidden></p>
+<div class="layout">
+<section class="panel form-panel"><h2 id="form-title">식재료 추가</h2><p class="muted">작은 기록으로 음식 낭비를 줄여요.</p>
+<form id="food-form"><label for="name">식재료 이름</label><input id="name" required maxlength="100" placeholder="예: 우유">
+<div class="two"><div><label for="quantity">수량</label><input id="quantity" type="number" min="0.001" step="any" required placeholder="1"></div><div><label for="unit">단위</label><input id="unit" required maxlength="20" placeholder="예: 개, g, 팩"></div></div>
+<label for="expiry">기한 날짜</label><input id="expiry" type="date" required min="0001-01-01" max="9999-12-31">
+<label for="location">보관 위치</label><select id="location"><option value="fridge">냉장</option><option value="freezer">냉동</option><option value="pantry">실온</option></select>
+<button id="submit-button" class="primary" type="submit">＋ 식재료 추가</button><button id="cancel-edit" type="button" hidden>수정 취소</button></form></section>
+<section class="inventory"><div class="list-heading"><h2>우리 집 식재료</h2><span id="count" class="muted"></span></div>
+<div class="tabs" role="group" aria-label="식재료 보기"><button id="active-tab" aria-pressed="true">보관 중</button><button id="used-tab" aria-pressed="false">사용 완료 기록</button></div>
+<div class="filters"><div><label for="search">이름 검색</label><input id="search" type="search" placeholder="식재료를 찾아보세요"></div><div><label for="filter-location">보관 위치</label><select id="filter-location"><option value="all">전체 위치</option><option value="fridge">냉장</option><option value="freezer">냉동</option><option value="pantry">실온</option></select></div><div><label for="filter-status">기한 상태</label><select id="filter-status"><option value="all">전체 상태</option><option value="expired">기한 지남</option><option value="today">오늘까지</option><option value="soon">3일 이내 (1~3일)</option><option value="fresh">여유 있음 (4일 이상)</option></select></div></div>
+<p class="muted small">기한 날짜가 가까운 순으로 표시합니다.</p><div id="food-list"></div>
+</section></div>
+<footer><p>날짜 표시는 식품의 섭취 안전성을 판단하는 기준이 아닙니다.</p><p>사용자 기기의 현지 날짜 기준 · <span id="today"></span><br>이 브라우저에만 저장되며 다른 기기와 동기화되지 않습니다.</p></footer>
+</main></body></html>
