@@ -10,10 +10,17 @@ const motionSetting = FridgeStorage.loadMotion();
 let reduceMotion = motionSetting.value;
 const pending = new Map();
 let undoItem = null, addedTimer = null;
-const animationEpoch=Date.now();let droolStart=null;
+const animationEpoch=Date.now();let droolStart=null;let droolButton=null;
 $('reduce-motion').checked = reduceMotion;
 function reduced(){return reduceMotion || motionQuery.matches;}
-function syncMotion(){document.documentElement.classList.toggle('reduce-motion', reduced());if(reduced())droolStart=null;}
+function syncMotion(){document.documentElement.classList.toggle('reduce-motion', reduced());if(reduced())stopDrool();updateMotionStatus();}
+function updateMotionStatus(){
+  const causes=[];
+  if(reduceMotion)causes.push('앱의 애니메이션 줄이기 설정');
+  if(motionQuery.matches)causes.push('기기/브라우저의 동작 줄이기 설정');
+  $('motion-status').textContent=causes.length?`${causes.join(' 및 ')}이 적용되어 표정 애니메이션을 생략합니다.`:'';
+}
+function stopDrool(){droolStart=null;droolButton=null;}
 function settingsError(text){$('settings-error').textContent=text;$('settings-error').hidden=false;}
 if(!motionSetting.ok)settingsError('애니메이션 설정을 읽지 못했습니다. 기본 설정을 사용합니다.');
 syncMotion();
@@ -43,7 +50,7 @@ function eat(id){
   const snapshot={...item};
   // Persist first. A reload during the presentation already sees the used record.
   if(!commit(items.map(i=>i.id===id?{...i,state:'used',usedAt:new Date().toISOString()}:i),'사용 완료 기록에 저장했어요.',false))return;
-  undoItem=snapshot;$('undo-notice').hidden=false;$('undo-button').disabled=false;
+  stopDrool();undoItem=snapshot;$('undo-notice').hidden=false;$('undo-button').disabled=false;
   if(editing===id)resetForm();
   if(!reduced()){
     const entry={snapshot,timer:null,focus:true,started:Date.now()};pending.set(id,entry);
@@ -74,7 +81,7 @@ function expressionFrame(entry){
   if(reduced())return 0;
   const now=Date.now();
   if(entry)return FridgeAnimation.eat(now-entry.started);
-  if(droolStart!==null && now-droolStart<1150)return FridgeAnimation.drool(now-droolStart);
+  if(droolStart!==null)return FridgeAnimation.drool((now-droolStart)%2300);
   return FridgeAnimation.idle(now-animationEpoch);
 }
 function paintCharacter(img,frame){
@@ -86,18 +93,55 @@ function paintAnimation(){
   if(document.hidden)return;
   const latest=[...pending.values()].at(-1);
   paintCharacter($('hero-dog'),expressionFrame(latest));
+  for(const preview of document.querySelectorAll('[data-preview-id]')){
+    const active=!reduced()&&!pending.size&&droolButton?.getAttribute('data-food-id')===preview.getAttribute('data-preview-id');
+    preview.setAttribute('data-preview-active',String(active));
+    if(active)paintCharacter(preview.querySelector('img'),expressionFrame());
+  }
   for(const img of document.querySelectorAll('[data-eating-id]')){
     const entry=pending.get(img.getAttribute('data-eating-id'));
     if(entry)paintCharacter(img,expressionFrame(entry));
   }
   for(const plate of document.querySelectorAll('[data-plate-id]')){
-    const entry=pending.get(plate.getAttribute('data-plate-id'));
-    if(entry)plate.setAttribute('data-portions',String(FridgeAnimation.portions(Date.now()-entry.started)));
+    const id=plate.getAttribute('data-plate-id');
+    const entry=id==='hero'?latest:pending.get(id);
+    const portions=entry?FridgeAnimation.portions(Date.now()-entry.started):droolStart!==null?2:0;
+    plate.setAttribute('data-portions',String(portions));
   }
 }
-function previewDrool(){if(!reduced()&&!pending.size){droolStart=Date.now();paintAnimation();}}
+function previewDrool(button){
+  if(reduced()||pending.size||!writable)return;
+  if(droolButton!==button||droolStart===null)droolStart=Date.now();
+  droolButton=button;paintAnimation();
+}
+function bindDrool(button){
+  let hovering=false,focused=false;
+  const start=()=>previewDrool(button);
+  const leave=()=>{if(!hovering&&!focused&&droolButton===button){stopDrool();paintAnimation();}};
+  button.addEventListener('pointerenter',event=>{if(event.pointerType!=='touch'){hovering=true;start();}});
+  button.addEventListener('mouseenter',()=>{hovering=true;start();});
+  button.addEventListener('pointerleave',()=>{hovering=false;leave();});
+  button.addEventListener('mouseleave',()=>{hovering=false;leave();});
+  button.addEventListener('focus',()=>{focused=true;start();});
+  button.addEventListener('blur',()=>{focused=false;leave();});
+  // Reconstructed buttons already under the pointer do not always get a new enter event.
+  button.refreshDrool=()=>{if(button.matches?.(':hover') && window.matchMedia('(any-hover: hover)').matches){hovering=true;start();}};
+}
+function reactionPreview(id){
+  const stage=node('div',undefined,'pet-stage reaction-preview');
+  stage.setAttribute('data-preview-id',id);stage.setAttribute('aria-hidden','true');
+  stage.append(characterImage('dog-image'),bowl(id));return stage;
+}
+function bowl(id){
+  const plate=node('div',undefined,'pet-bowl');
+  if(id)plate.setAttribute('data-plate-id',id);
+  plate.setAttribute('data-portions','0');
+  plate.append(node('span',undefined,'food-portion portion-one'),node('span',undefined,'food-portion portion-two'));
+  return plate;
+}
 FridgeAnimation.preload(ok=>{
   if(!ok){$('image-error').textContent='표정 애니메이션을 불러오지 못해 기본 이미지를 사용합니다. 식재료 관리는 계속할 수 있어요.';$('image-error').hidden=false;}
+  if(ok&&droolButton)droolStart=Date.now();
   paintAnimation();
 });
 setInterval(paintAnimation,60);
@@ -105,7 +149,7 @@ function onCharacterError(event){
   const img=event.target;
   if(img.getAttribute('data-frame')!==null){
     FridgeAnimation.disable();
-    for(const target of [$('hero-dog'),...document.querySelectorAll('[data-eating-id]')]){target.removeAttribute('data-frame');target.src=characterSource;}
+    for(const target of [$('hero-dog'),...document.querySelectorAll('[data-frame]')]){target.removeAttribute('data-frame');target.src=characterSource;}
     $('image-error').textContent='표정 이미지를 불러오지 못해 기본 이미지를 사용합니다.';
   }else img.hidden=true;
   $('image-error').hidden=false;
@@ -122,8 +166,8 @@ $('hero-dog').addEventListener('error',onCharacterError);
 if($('hero-dog').complete && !$('hero-dog').naturalWidth)onCharacterError({target:$('hero-dog')});
 function eatingCard(item){
   const card=node('article',undefined,'food-card eating-card');card.setAttribute('aria-label',`${item.name}: 사용 완료 저장됨`);
-  const scene=node('div',undefined,'eating-scene');scene.setAttribute('aria-hidden','true');
-  const plate=node('div',undefined,'cartoon-plate');plate.setAttribute('data-plate-id',item.id);plate.setAttribute('data-portions',String(FridgeAnimation.portions(Date.now()-pending.get(item.id).started)));plate.append(node('span',undefined,'food-portion portion-one'),node('span',undefined,'food-portion portion-two'));scene.append(plate);
+  const scene=node('div',undefined,'eating-scene pet-stage');scene.setAttribute('aria-hidden','true');
+  const plate=bowl(item.id);plate.setAttribute('data-portions',String(FridgeAnimation.portions(Date.now()-pending.get(item.id).started)));scene.append(plate);
   const img=characterImage('eating-dog dog-image');img.setAttribute('data-eating-id',item.id);paintCharacter(img,expressionFrame(pending.get(item.id)));scene.append(img,node('span','✧ 냠! ✧','yum'));
   card.append(scene,node('p','사용 완료 기록에 저장했어요.','small'));return card;
 }
@@ -141,6 +185,8 @@ function action(text,handler,className){const button=node('button',text,classNam
 function resetForm(){editing=null;$('food-form').reset();$('form-title').textContent='식재료 추가';$('submit-button').textContent='＋ 식재료 추가';$('cancel-edit').hidden=true;}
 function edit(item){editing=item.id;for(const key of ['name','quantity','unit','expiry','location'])$(key).value=item[key];$('form-title').textContent='식재료 수정';$('submit-button').textContent='변경 사항 저장';$('cancel-edit').hidden=false;$('name').focus();$('form-title').scrollIntoView({behavior:'smooth',block:'start'});}
 function render(){
+  const focusedFoodId=document.activeElement?.getAttribute('data-food-id');
+  stopDrool();
   const today=FridgeDates.todayLocal();$('today').textContent=today;updateHero(today);paintAnimation();
   $('active-tab').setAttribute('aria-pressed',String(tab==='active'));$('used-tab').setAttribute('aria-pressed',String(tab==='used'));
   const query=$('search').value.trim().toLocaleLowerCase('ko');
@@ -148,7 +194,7 @@ function render(){
   const visible=displayItems.filter(item=>item.state===tab && item.name.toLocaleLowerCase('ko').includes(query) && ($('filter-location').value==='all'||item.location===$('filter-location').value) && ($('filter-status').value==='all'||FridgeDates.status(item.expiry,today)===$('filter-status').value)).sort((a,b)=>a.expiry.localeCompare(b.expiry)||a.name.localeCompare(b.name,'ko'));
   $('count').textContent=`${visible.filter(i=>tab!=='active'||!pending.has(i.id)).length}개`;
   const list=$('food-list');list.replaceChildren();
-  if(!visible.length){const empty=node('div',undefined,'empty');empty.append(node('h3',!writable?'저장 데이터를 확인해 주세요':items.some(i=>i.state===tab)?'조건에 맞는 식재료가 없어요':tab==='used'?'아직 사용 완료 기록이 없어요':'냉장고의 첫 기록을 남겨보세요'));
+  if(!visible.length){const empty=node('div',undefined,'empty-state');empty.append(node('h3',!writable?'저장 데이터를 확인해 주세요':items.some(i=>i.state===tab)?'조건에 맞는 식재료가 없어요':tab==='used'?'아직 사용 완료 기록이 없어요':'냉장고의 첫 기록을 남겨보세요'));
     empty.append(node('p',!writable?'위의 저장 오류 안내를 확인해 주세요.':items.some(i=>i.state===tab)?'검색어나 필터를 바꿔보세요.':tab==='used'?'식재료를 다 쓰면 ‘다 먹었어요!’를 눌러주세요.':'이름과 기한 날짜를 입력해 시작하세요.'));
     if(writable&&tab==='active'&&!items.some(i=>i.state==='active'))empty.append(action('첫 식재료 추가하기',()=>{$('name').focus();$('form-title').scrollIntoView({behavior:'smooth'});}));list.append(empty);return;}
   for(const item of visible){if(tab==='active'&&pending.has(item.id)){list.append(eatingCard(item));continue;}const card=node('article',undefined,'food-card');const top=node('div',undefined,'card-top');const status=FridgeDates.status(item.expiry,today);top.append(node('h3',item.name),node('span',labels[status],`badge ${status}`));card.append(top,node('p',`${item.quantity} ${item.unit} · ${locations[item.location]}`,'details'),node('p',`기한 날짜 ${item.expiry}`,'details'));
@@ -156,12 +202,17 @@ function render(){
     const actions=node('div',undefined,'actions');actions.append(action('수정',()=>edit(item)));
     if(item.state==='active'){
       const useButton=action('다 먹었어요!',()=>eat(item.id),'use');
-      useButton.addEventListener('pointerenter',event=>{if(event.pointerType==='mouse')previewDrool();});
-      useButton.addEventListener('focus',previewDrool);
+      useButton.setAttribute('data-food-id',item.id);bindDrool(useButton);
+      card.append(reactionPreview(item.id));
       actions.append(useButton);
     }
     actions.append(action('삭제',()=>{if(window.confirm(`‘${item.name}’ 기록을 삭제할까요? 삭제 후에는 되돌릴 수 없습니다.`)){if(commit(items.filter(i=>i.id!==item.id),'삭제했습니다.')){if(editing===item.id)resetForm();if(undoItem?.id===item.id){undoItem=null;$('undo-notice').hidden=true;}const entry=pending.get(item.id);if(entry)clearTimeout(entry.timer);pending.delete(item.id);render();}}},'delete'));card.append(actions);list.append(card);
   }
+  for(const button of document.querySelectorAll('.use')){
+    button.refreshDrool?.();
+    if(focusedFoodId && button.getAttribute('data-food-id')===focusedFoodId)button.focus();
+  }
+  paintAnimation();
 }
 $('food-form').addEventListener('submit',event=>{event.preventDefault();if(!writable)return;
   const name=$('name').value.trim(),unit=$('unit').value.trim(),quantity=Number($('quantity').value),expiry=$('expiry').value;
