@@ -1,8 +1,7 @@
-# 角色圖片（尚待原始檔）
+# 角色圖片
 
-請將使用者提供的原始透明 PNG 原封不動放在此資料夾，檔名為 `chihuahua.png`。
-目前聊天圖片未提供可讀取的原始檔案，故尚未納入圖片；不以重畫圖或假圖片替代。
+`chihuahua.png` 為使用者提供的原始吉娃娃圖片，1254 × 1254、RGBA PNG，含透明像素。保留原始位元組，未裁切、重新繪製或重編碼。
 
-網頁和吃完動畫均使用相對路徑 `assets/chihuahua.png`。
-圖片以 object-fit: contain、height: auto 與 image-rendering: pixelated 顯示，不裁切、不拉伸。
-請保留透明背景與完整畫布，並在圖片到位後檢查實際長寬比與耳朵是否完整。
+首頁與吃完演出均使用相對路徑 `assets/chihuahua.png`，透過 object-fit: contain、height: auto 與 image-rendering: pixelated 完整顯示。
+
+本圖為單張靜態圖片，CSS 只移動或旋轉整張圖片，不會改變表情。素材由使用者提供，未自行宣告開源圖片授權。

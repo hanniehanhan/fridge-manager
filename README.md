@@ -2,7 +2,7 @@
 
 韓文介面的冰箱食材管理課堂作業。以奶油白和飽和黃呈現，使用 HTML、CSS、原生 JavaScript，不需要套件安裝、登入或後端。
 
-**目前狀態：本機版本，尚未推送或部署。角色原始 PNG 尚待提供。** 已改成載入使用者靜態圖片的程式；找不到圖片時顯示韓文提示，食材功能仍可使用。沒有 GitHub repository 網址或正式網站網址。
+**目前狀態：本機版本，尚未推送或部署。已接入使用者提供的透明 PNG。** 找不到圖片時顯示韓文提示，食材功能仍可使用。沒有 GitHub repository 網址或正式網站網址。
 
 ## 本機使用
 
@@ -29,7 +29,7 @@ python3 -m http.server 8000 --bind 127.0.0.1
 
 ## 角色圖片
 
-請提供原始透明 PNG，放入 `assets/chihuahua.png`。目前原檔尚未取得，因此還不能聲稱角色替換完成、透明度已驗證或圖片已隨 commit 保存。
+使用者提供的原始透明 PNG 位於 `assets/chihuahua.png`，尺寸為 1254 × 1254。已檢查實際 alpha 通道含透明像素，保留原檔，不裁切、不重新編碼。
 
 首頁與吃完演出均使用此相對路徑；不使用 `/assets/...` 根路徑，可配合日後 GitHub Pages 儲存庫子路徑。圖片使用 `image-rendering: pixelated`、`object-fit: contain` 與自動高度，保留完整比例，不刻意裁掉耳朵。桌面首頁寬度最多 220px，手機最多 165px；吃完演出分別 140px／120px。
 
@@ -71,7 +71,7 @@ node --check date-utils.js
 ## Git 與檔案
 
 - 原始碼：`index.html`、`styles.css`、`app.js`、`storage.js`、`date-utils.js`。
-- 圖片目錄：`assets/`；原始圖待補，不以 SVG 或假圖片替代。
+- 圖片目錄：`assets/`；原始透明圖已納入，不以 SVG 或假圖片替代。
 - 測試：`test.cjs`；紀錄：`DEVELOPMENT_LOG.md`。
 - `.local-backups/`、依賴、環境變數檔、私鑰、測試產物與編輯器資料由 `.gitignore` 排除。
 - 不含遠端設定、GitHub 或部署網址。沒有推送／部署。

@@ -75,7 +75,7 @@ function onCharacterError(event){
 }
 function characterImage(className){
   const img=node('img',undefined,className);
-  img.alt='';img.width=1280;img.height=1280;
+  img.alt='';img.width=1254;img.height=1254;
   img.addEventListener('error',onCharacterError);
   img.src=characterSource;
   return img;
