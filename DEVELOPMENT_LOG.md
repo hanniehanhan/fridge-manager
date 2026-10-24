@@ -142,3 +142,12 @@
 - 首次沙箱內 curl 無法連接 8000；嘗試啟動伺服器回報 Address already in use。改從已授權的沙箱外 curl 檢查既有伺服器，圖片回應 HTTP 200、image/png，長度與本機檔一致，沒有停止或替換占用連接埠的程序。
 - 待親自驗證：真實手機／桌面圖片大小、完整耳朵與按鈕不遮擋、吃完與復原視覺、減少動畫及瀏覽器通知。靜態原圖不會自行改變表情。
 - 本次將真實 PNG 與文件修正納入後續本機 commit；不推送、不部署，沒有新增遠端網址。
+
+
+## GitHub 上傳準備｜2026-10-24
+
+- 使用者明確授權上傳至 `https://github.com/hanniehanhan/fridge-manager.git`，不設定網站部署。
+- 初始檢查：工作目錄乾淨，主要分支 main，沒有既有 remote；圖片、程式、README、DEVELOPMENT_LOG 與測試均已追蹤。
+- 檢查 `.gitignore`，本機備份、環境變數、私鑰與暫存／測試產物維持排除。
+- 第一次查詢遠端受沙箱網路限制，回報 Could not resolve host；取得網路權限後 `git ls-remote` 成功且無 refs，遠端當時是空儲存庫，沒有須合併的既有歷史。
+- README 更新為使用者提供的真實儲存庫網址，不編造網站部署網址。本次採一般推送 main，不使用 force；若遠端在檢查後變動，保留 Git 的拒絕保護。

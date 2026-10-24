@@ -2,7 +2,7 @@
 
 韓文介面的冰箱食材管理課堂作業。以奶油白和飽和黃呈現，使用 HTML、CSS、原生 JavaScript，不需要套件安裝、登入或後端。
 
-**目前狀態：本機版本，尚未推送或部署。已接入使用者提供的透明 PNG。** 找不到圖片時顯示韓文提示，食材功能仍可使用。沒有 GitHub repository 網址或正式網站網址。
+**已接入使用者提供的透明 PNG，尚未設定網站部署。** 找不到圖片時顯示韓文提示，食材功能仍可使用。原始碼儲存庫：[hanniehanhan/fridge-manager](https://github.com/hanniehanhan/fridge-manager)。尚無正式網站網址。
 
 ## 本機使用
 
@@ -74,4 +74,4 @@ node --check date-utils.js
 - 圖片目錄：`assets/`；原始透明圖已納入，不以 SVG 或假圖片替代。
 - 測試：`test.cjs`；紀錄：`DEVELOPMENT_LOG.md`。
 - `.local-backups/`、依賴、環境變數檔、私鑰、測試產物與編輯器資料由 `.gitignore` 排除。
-- 不含遠端設定、GitHub 或部署網址。沒有推送／部署。
+- 原始碼目標為 `https://github.com/hanniehanhan/fridge-manager.git`，主要分支為 `main`。尚未設定網站部署。
